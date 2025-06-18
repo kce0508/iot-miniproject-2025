@@ -84,6 +84,8 @@ ERD
 
     https://github.com/user-attachments/assets/85ddb70e-eae4-4faf-93fb-48c9d749a866
 
+5. 선별결과 MQTT로 전달
+
 ##### MQTT Subscriber
 - WPF 과목에서 사용했던 MQTT Subscriber 그대로 사용
 - WpfMqttSubApp 프로젝트 가져오기
