@@ -49,6 +49,7 @@ namespace WpfIoTSimulatorApp.ViewModels
         #endregion
 
         #region 뷰와 연계되는 속성
+
         public string LogText 
         { 
             get => _logText; 
@@ -71,6 +72,7 @@ namespace WpfIoTSimulatorApp.ViewModels
         #endregion
 
         #region 일반메서드
+
         private async Task InitMqttClient()
         {
             var mqttFactory = new MqttClientFactory();
@@ -82,7 +84,6 @@ namespace WpfIoTSimulatorApp.ViewModels
                                         .WithClientId(clientId)
                                         .WithCleanSession(true)
                                         .Build();
-
             // MQTT 클라이언트에 접속
             mqttClient.ConnectedAsync += async e =>
             {
@@ -143,7 +144,6 @@ namespace WpfIoTSimulatorApp.ViewModels
                     productBrush = Brushes.Aqua;
                     break;
             }   // 아래의 람다 switch와 완정동일 기능 */
-
             ProductBrush = result switch 
             { 
                 1 => Brushes.Green,     // 양품
@@ -159,6 +159,7 @@ namespace WpfIoTSimulatorApp.ViewModels
                 Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss "),
                 Result = resultText,
             };
+            // 일반 객체 데이터를 json으로 변경 -> 직렬화(Serialization).
             var jsonpayload = JsonConvert.SerializeObject(payload, Formatting.Indented);
             var message = new MqttApplicationMessageBuilder()
                                 .WithTopic(mqttTopic)
