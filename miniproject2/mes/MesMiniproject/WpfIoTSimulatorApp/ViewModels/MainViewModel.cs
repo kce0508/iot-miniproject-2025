@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MQTTnet;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using WpfIoTSimulatorApp.Models;
 
 namespace WpfIoTSimulatorApp.ViewModels
 {
@@ -37,11 +39,14 @@ namespace WpfIoTSimulatorApp.ViewModels
 
             // MQTT용 초기화
             brokerHost = "210.119.12.84";    // 본인 pc 아이피
-            clientId = "IOT01";  //IoT
+            clientId = "IOT01";  // IoT장 비번호
             mqttTopic = "pknu/sf84/data";    // 스마트 팩토리 토픽
+            logNum = 1; // 로그번호를 1부터 시작
             // MQTT 클라이언트 생성 및 초기화
             InitMqttClient();
         }
+
+        #endregion
 
         #region 뷰와 연계되는 속성
         public string LogText 
@@ -65,6 +70,7 @@ namespace WpfIoTSimulatorApp.ViewModels
 
         #endregion
 
+        #region 일반메서드
         private async Task InitMqttClient()
         {
             var mqttFactory = new MqttClientFactory();
@@ -72,7 +78,7 @@ namespace WpfIoTSimulatorApp.ViewModels
 
             // MQTT 클라이언트 접속 설정
             var mqttClientOptions = new MqttClientOptionsBuilder()
-                                        .WithTcpServer(brokerHost, 1883)    // 포트가 기존과 다르면 포트번호도 입력
+                                        .WithTcpServer(brokerHost, 1883)    // 포트가 기존과 다르면 포트번호도 입력 필요
                                         .WithClientId(clientId)
                                         .WithCleanSession(true)
                                         .Build();
@@ -115,10 +121,6 @@ namespace WpfIoTSimulatorApp.ViewModels
             StartHmiRequested?.Invoke();    // 컨베이어벨트 애니메이션 요청(View에서 처리)
         }
 
-        #endregion
-
-        #region
-
         [RelayCommand]
         public void Check()
         {
@@ -128,20 +130,39 @@ namespace WpfIoTSimulatorApp.ViewModels
             Random rand = new();
             int result = rand.Next(1, 3);   // 1 ~ 2
 
+            /*
+            switch (result)
+            {
+                case 1:
+                    productBrush = Brushes.Green;
+                    break;
+                case 2:
+                    productBrush = Brushes.Crimson;
+                    break;
+                default:
+                    productBrush = Brushes.Aqua;
+                    break;
+            }   // 아래의 람다 switch와 완정동일 기능 */
+
             ProductBrush = result switch 
             { 
                 1 => Brushes.Green,     // 양품
                 2 => Brushes.Crimson,   // 불량
                 _ => Brushes.Aqua,      // default 혹시나
-
             };
 
             // MQTT로 데이터 전송
             var resultText = result == 1 ? "OK" : "FAIL";
-            var payload = $"[{DateTime.Now}] / Result:{resultText}";
+            var payload = new CheckResult
+            {
+                ClientId = clientId,
+                Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss "),
+                Result = resultText,
+            };
+            var jsonpayload = JsonConvert.SerializeObject(payload, Formatting.Indented);
             var message = new MqttApplicationMessageBuilder()
                                 .WithTopic(mqttTopic)
-                                .WithPayload(payload)
+                                .WithPayload(jsonpayload)
                                 .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                                 .Build();
 
