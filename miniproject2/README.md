@@ -121,6 +121,11 @@ ERD
 
 10. ScheduleView 데이터그리드, 입력양식 수정
 
+11. EntityFramework용 패키지 설치
+    - Microsoft.EntityFrameworkCore
+    - Microsoft.EntityFrameworkCore.Tools
+    - Pomelo.EntityFrameworkCore.MySql
+
 #### 파이썬 AI + ASP.NET 연동
 - 참조 소스
 - iot-webapp-2025/ref/ReferencedSolution/ConvertWebApp
