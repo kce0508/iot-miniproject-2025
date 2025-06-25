@@ -41,11 +41,10 @@ namespace WpfMrpSimulatorApp.ViewModels
         {
             //var result = MessageBox.Show("종료하시겠습니까?", "종료확인", MessageBoxButton.YesNo, MessageBoxImage.Question);
             var result = await this.dialogCoordinator.ShowMessageAsync(this, "종료확인", "종료하시겠습니까?", MessageDialogStyle.AffirmativeAndNegative);
-            if (result == MessageDialogResult.Affirmative)
+            if (result == MessageDialogResult.Affirmative) 
             {
                 Application.Current.Shutdown();
-            }
-            else
+            } else
             {
                 return;
             }
@@ -68,6 +67,18 @@ namespace WpfMrpSimulatorApp.ViewModels
         {
             var viewModel = new ScheduleViewModel(Common.DIALOGCOORDINATOR);
             var view = new ScheduleView
+            {
+                DataContext = viewModel,
+            };
+
+            CurrentView = view;
+        }
+
+        [RelayCommand]
+        public void GetMonitoring()
+        {
+            var viewModel = new MonitoringViewModel(Common.DIALOGCOORDINATOR);
+            var view = new MonitoringView
             {
                 DataContext = viewModel,
             };
