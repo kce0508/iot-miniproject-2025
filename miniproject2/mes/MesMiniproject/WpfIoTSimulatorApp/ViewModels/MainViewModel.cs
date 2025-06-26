@@ -23,10 +23,11 @@ namespace WpfIoTSimulatorApp.ViewModels
 
         private IMqttClient mqttClient;
         private string brokerHost;
-        private string mqttTopic;
+        private string mqttPubTopic;
         private string clientId;
 
         private int logNum;  // 로그메시지 순번
+        private string mqttSubTopic;
 
         #endregion
 
@@ -38,9 +39,11 @@ namespace WpfIoTSimulatorApp.ViewModels
             LogText = "프로그램 실행";
 
             // MQTT용 초기화
-            brokerHost = "210.119.12.52"; // 본인 PC 아이피
-            clientId = "IOT01";  // IoT장비번호
-            mqttTopic = "pknu/sf52/data"; // 스마트팩토리 토픽
+            brokerHost = "210.119.12.84";        // 본인 PC 아이피
+            clientId = "IOT01";                  // IoT장비번호
+            mqttPubTopic = "pknu/sf84/data";     // 스마트팩토리 토픽
+            mqttSubTopic = "pknu/sf84/control";  // 모니터링에서 넘어오는 토픽
+
             logNum = 1; // 로그번호를 1부터 시작
             // MQTT 클라이언트 생성 및 초기화
             InitMqttClient();
@@ -94,7 +97,7 @@ namespace WpfIoTSimulatorApp.ViewModels
 
             // 테스트 메시지 
             var message = new MqttApplicationMessageBuilder()
-                                .WithTopic(mqttTopic)
+                                .WithTopic(mqttPubTopic)
                                 .WithPayload("Hello From IoT Simulator!")
                                 .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                                 .Build();
@@ -102,6 +105,14 @@ namespace WpfIoTSimulatorApp.ViewModels
             // MQTT 브로커로 전송!
             await mqttClient.PublishAsync(message);
             LogText = "MQTT 브로커에 초기메시지 전송!";
+
+            await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(mqttSubTopic).Build());
+            mqttClient.ApplicationMessageReceivedAsync += MqttMessageReceivedAsync;
+        }
+
+        private async Task MqttMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs args)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -151,25 +162,34 @@ namespace WpfIoTSimulatorApp.ViewModels
                 _ => Brushes.Aqua,      // default 혹시나
             };
 
-            // MQTT로 데이터 전송
-            var resultText = result == 1 ? "OK" : "FAIL";
-            var payload = new CheckResult
+            try
             {
-                ClientId = clientId,
-                Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                Result = resultText,
-            };
-            // 일반 객체 데이터를 json으로 변경 -> 직렬화(Serialization).
-            var jsonPayload = JsonConvert.SerializeObject(payload, Formatting.Indented);
-            var message = new MqttApplicationMessageBuilder()
-                                .WithTopic(mqttTopic)
-                                .WithPayload(jsonPayload)
-                                .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
-                                .Build();
+                // MQTT로 데이터 전송
+                var resultText = result == 1 ? "OK" : "FAIL";
+                var payload = new CheckResult
+                {
+                    ClientId = clientId,
+                    Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Result = resultText,
+                };
+                // 일반 객체 데이터를 json으로 변경 -> 직렬화(Serialization).
+                var jsonPayload = JsonConvert.SerializeObject(payload, Formatting.Indented);
+                var message = new MqttApplicationMessageBuilder()
+                                    .WithTopic(mqttPubTopic)
+                                    .WithPayload(jsonPayload)
+                                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                                    .Build();
 
-            // MQTT 브로커로 전송!
-            mqttClient.PublishAsync(message);
-            LogText = $"MQTT 브로커에 결과메시지 전송 : {logNum++}";
+                // MQTT 브로커로 전송!
+                mqttClient.PublishAsync(message);
+                LogText = $"MQTT 브로커에 결과메시지 전송 : {logNum++}";
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
 
         }
 
