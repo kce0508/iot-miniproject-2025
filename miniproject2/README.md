@@ -142,6 +142,8 @@ ERD
     - Start버튼 눌러서 IoT Simulator 동작시키고 동기화
     - 체크이후 성공/실패 결과 DB에 저장, 실시간 시각화
 
+https://github.com/user-attachments/assets/b9c18831-2d76-4e38-8524-c946aae4c0f9
+
 ##### 추후 작업
 1. ReportView, ReportViewModel LiveChart 작업
 2. MainView 상태 표시줄 완성
