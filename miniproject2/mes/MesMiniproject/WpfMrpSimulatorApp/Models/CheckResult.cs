@@ -1,6 +1,6 @@
 ﻿namespace WpfMrpSimulatorApp.Models
 {
-    // JSON 전송용 객체
+    // JSON 전송용 객체. 딴데 안써요
     public class CheckResult
     {
         public string ClientId { get; set; }
